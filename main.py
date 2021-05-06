@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 
 app = Flask(__name__)
 
@@ -21,3 +21,15 @@ def about():
 @app.route('/contact/')
 def contact():
     return "CONTACT PAGE"
+
+@app.route("/user", methods=["POST"])
+def user():
+    # return request.json #return dict
+    # return request.form # return dict
+    # return "User"
+
+    name = request.json["name"]
+    data = dict()
+    data["name"] = name
+    data["message"] = "Success!"
+    return data, 201, {"authors" : "sal"}
