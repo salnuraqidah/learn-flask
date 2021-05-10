@@ -1,6 +1,8 @@
 from app import app
-from flask import request
-
+from flask import redirect, url_for, request, jsonify
+import os
+from werkzeug.utils import secure_filename
+ 
 @app.route('/')
 def hello():
     return ('Hai Semua!!!')
@@ -32,3 +34,21 @@ def user():
     data["name"] = name
     data["message"] = "Success!"
     return data, 201, {"authors" : "sal"}
+
+ALLOWED_EXTENSIONS = {'jpeg', 'jpg', 'png', 'svg'}
+def allowed_file(filename):
+    return "." in filename and filename.rsplit(".",1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    UPLOAD_FOLDER = "./app/static/upload/"
+    app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+    if "image" not in request.files:
+        return {"message" : "no selected file"}, 400
+    image = request.files['image']
+    if allowed_file(image.filename):
+        filename = secure_filename(image.filename)
+        image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        return {"message" : "success"}, 201
+    else:
+        return {"message" : {"type" : list(ALLOWED_EXTENSIONS)}}, 415
